@@ -1,0 +1,105 @@
+# Load required libraries
+library(shiny)
+library(RPostgres)
+
+# Connect to the database
+con <- dbConnect(RPostgres::Postgres(),
+                 dbname = "dvdrental",
+                 host = "localhost",
+                 port = "5432",
+                 user = "postgres",
+                 password = "12345")
+
+# Retrieve data from the customer table
+result <- dbGetQuery(con, "SELECT * FROM customer")
+
+# Disconnect from the database
+dbDisconnect(con)
+
+# Define UI for shiny app
+ui <- fluidPage(
+  
+  # Add a title to the app
+  titlePanel("DVD Rental Customer Data"),
+  
+  # Create a sidebar panel for drop-down menus and download button
+  sidebarPanel(
+    
+    # Add labels and drop-down menus for each variable
+    h4("Filter Data"),
+    
+    selectInput("customer_id", "Customer ID", choices = c("All", unique(result$customer_id)), selected = "All"),
+    selectInput("store_id", "Store ID", choices = c("All", unique(result$store_id)), selected = "All"),
+    selectInput("first_name", "First Name", choices = c("All", unique(result$first_name)), selected = "All"),
+    selectInput("last_name", "Last Name", choices = c("All", unique(result$last_name)), selected = "All"),
+    selectInput("active", "Active", choices = c("All", "True", "False"), selected = "All"),
+    
+    # Add a download button
+    downloadButton("downloadData", "Download Filtered Data", class = "btn-primary mt-3")
+    
+  ),
+  
+  # Create a main panel for displaying the data table
+  mainPanel(
+    
+    # Add a title to the data table
+    h4("Filtered Customer Data"),
+    
+    # Add a subtitle indicating the number of rows in the table
+    h5(textOutput("rowCount")),
+    
+    # Add a data table
+    dataTableOutput("table")
+    
+  )
+  
+)
+
+# Define server for shiny app
+server <- function(input, output) {
+  
+  # Filter the data based on user inputs
+  filtered_data <- reactive({
+    data <- result
+    if (input$customer_id != "All") {
+      data <- data[data$customer_id == input$customer_id,]
+    }
+    if (input$store_id != "All") {
+      data <- data[data$store_id == input$store_id,]
+    }
+    if (input$first_name != "All") {
+      data <- data[data$first_name == input$first_name,]
+    }
+    if (input$last_name != "All") {
+      data <- data[data$last_name == input$last_name,]
+    }
+    if (input$active != "All") {
+      data <- data[data$activebool == (input$active == "True"),]
+    }
+    return(data)
+  })
+  
+  # Display the filtered data table
+  output$table <- renderDataTable({
+    filtered_data()
+  })
+  
+  # Display the number of rows in the filtered data table
+  output$rowCount <- renderText({
+    paste("Number of Rows: ", nrow(filtered_data()))
+  })
+  
+  # Download the filtered data as a CSV file
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("filtered_data", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(filtered_data(), file, row.names = FALSE)
+    }
+  )
+  
+}
+
+# Run the shiny app
+shinyApp(ui = ui, server = server)
