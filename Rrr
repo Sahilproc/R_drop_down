@@ -24,11 +24,6 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create pivot table
   output$pivot <- renderRpivotTable({
-    # Check if all input parameters have values selected
-    if (is.null(input$rows) || is.null(input$cols) || is.null(input$vals)) {
-      return(NULL)  # Return NULL to prevent the pivot table from rendering
-    }
-    
     pivot <- rpivotTable(
       data = mtcars,
       rows = input$rows,
@@ -40,8 +35,10 @@ server <- function(input, output) {
     
     # Add percentage column
     if (nrow(pivot) > 0) {
-      total <- sum(pivot[, input$vals])
-      pivot[, paste0(input$vals, " %")] <- sprintf("%.1f%%", pivot[, input$vals] / total * 100)
+      total <- sum(pivot[, input$vals], na.rm = TRUE)
+      if (!is.na(total)) {
+        pivot[, paste0(input$vals, " %")] <- sprintf("%.1f%%", pivot[, input$vals] / total * 100)
+      }
     }
     
     pivot
