@@ -1,5 +1,6 @@
 library(shiny)
 library(rpivotTable)
+library(dplyr)
 
 # Load data
 data(mtcars)
@@ -24,36 +25,22 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create pivot table
   output$pivot <- renderRpivotTable({
+    df <- mtcars %>% 
+      group_by_at(vars(input$rows, input$cols)) %>% 
+      summarise(Total = sum(!!sym(input$vals))) %>% 
+      pivot_wider(names_from = input$cols, values_from = Total, values_fill = 0)
+    
+    df_percent <- df %>% 
+      mutate(Total = rowSums(across(everything()))) %>% 
+      mutate(across(everything(), ~ . / Total * 100))
+    
     rpivotTable(
-      data = mtcars,
+      data = df_percent,
       rows = input$rows,
       cols = input$cols,
       aggregatorName = input$agg,
-      vals = input$vals,
-      rendererName = "Table",
-      afterRender = '
-        function(pivotData) {
-          var sum = 0;
-          for (var i = 0; i < pivotData.length; i++) {
-            sum += pivotData[i][colNames.indexOf(input$vals)];
-          }
-          var colNames = pivotData.map(function(d) { return d.colName; });
-          var valIdx = colNames.indexOf(input$vals);
-          var pctIdx = pivotData[0].length;
-          for (var i = 0; i < pivotData.length; i++) {
-            var rowTotal = pivotData[i][valIdx];
-            if (rowTotal !== null) {
-              pivotData[i][pctIdx] = (rowTotal / sum * 100).toFixed(1) + "%";
-            } else {
-              pivotData[i][pctIdx] = "";
-            }
-          }
-          colNames[pctIdx] = input$vals + " %";
-          return {
-            colNames: colNames,
-            data: pivotData
-          };
-        }'
+      vals = names(df)[2:length(names(df))],
+      rendererName = "Table"
     )
   })
 }
