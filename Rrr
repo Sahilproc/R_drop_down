@@ -35,7 +35,7 @@ server <- function(input, output) {
       mutate(across(everything(), ~ . / Total * 100))
     
     rpivotTable(
-      data = df_percent,
+      data = as.data.frame(df_percent),
       rows = input$rows,
       cols = input$cols,
       aggregatorName = input$agg,
