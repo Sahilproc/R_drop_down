@@ -24,6 +24,11 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create pivot table
   output$pivot <- renderRpivotTable({
+    # Check if all input parameters have values selected
+    if (is.null(input$rows) || is.null(input$cols) || is.null(input$vals)) {
+      return(NULL)  # Return NULL to prevent the pivot table from rendering
+    }
+    
     pivot <- rpivotTable(
       data = mtcars,
       rows = input$rows,
