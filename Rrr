@@ -24,18 +24,15 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create pivot table
   output$pivot <- renderRpivotTable({
+    # Pivot table with percentage column
     rpivotTable(
       data = mtcars,
       rows = input$rows,
       cols = input$cols,
       aggregatorName = input$agg,
-      vals = input$vals,
-      derivedAttributes = list(
-        "Percent" = htmlwidgets::JS(
-          "function(mp) {",
-          "  return (mp['mpg'] / mp['wt']) * 100;",
-          "}"
-        )
+      vals = list(
+        value = input$vals,
+        percent = function(x) formatC(x / sum(x) * 100, format = "f", digits = 1)
       ),
       rendererName = "Table"
     )
@@ -45,3 +42,4 @@ server <- function(input, output) {
 # Run the app
 shinyApp(ui, server)
 
+Jj
