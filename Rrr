@@ -24,24 +24,37 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create pivot table
   output$pivot <- renderRpivotTable({
-    pivot <- rpivotTable(
+    rpivotTable(
       data = mtcars,
       rows = input$rows,
       cols = input$cols,
       aggregatorName = input$agg,
       vals = input$vals,
-      rendererName = "Table"
+      rendererName = "Table",
+      afterRender = '
+        function(pivotData) {
+          var sum = 0;
+          for (var i = 0; i < pivotData.length; i++) {
+            sum += pivotData[i][colNames.indexOf(input$vals)];
+          }
+          var colNames = pivotData.map(function(d) { return d.colName; });
+          var valIdx = colNames.indexOf(input$vals);
+          var pctIdx = pivotData[0].length;
+          for (var i = 0; i < pivotData.length; i++) {
+            var rowTotal = pivotData[i][valIdx];
+            if (rowTotal !== null) {
+              pivotData[i][pctIdx] = (rowTotal / sum * 100).toFixed(1) + "%";
+            } else {
+              pivotData[i][pctIdx] = "";
+            }
+          }
+          colNames[pctIdx] = input$vals + " %";
+          return {
+            colNames: colNames,
+            data: pivotData
+          };
+        }'
     )
-    
-    # Add percentage column
-    if (nrow(pivot) > 0) {
-      total <- sum(pivot[, input$vals], na.rm = TRUE)
-      if (!is.na(total)) {
-        pivot[, paste0(input$vals, " %")] <- sprintf("%.1f%%", pivot[, input$vals] / total * 100)
-      }
-    }
-    
-    pivot
   })
 }
 
