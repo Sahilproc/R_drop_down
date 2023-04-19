@@ -1,0 +1,38 @@
+library(shiny)
+library(rpivotTable)
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Pivot Table Example"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("row", "Select Rows:", choices = colnames(mtcars)),
+      selectInput("col", "Select Columns:", choices = colnames(mtcars)),
+      selectInput("val", "Select Values:", choices = colnames(mtcars), selected = "mpg"),
+      selectInput("agg", "Select Aggregation:", choices = c("Sum", "Average"))
+    ),
+    mainPanel(
+      rpivotTableOutput("table")
+    )
+  )
+)
+
+# Define server
+server <- function(input, output) {
+  # Create pivot table
+  output$table <- renderRpivotTable({
+    rpivotTable(
+      data = mtcars,
+      rows = input$row,
+      cols = input$col,
+      aggregatorName = ifelse(input$agg == "Sum", "Sum", "Average"),
+      vals = input$val,
+      rendererName = "Table",
+      width = "100%",
+      height = "500px"
+    )
+  })
+}
+
+# Run the app
+shinyApp(ui, server)
