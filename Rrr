@@ -51,4 +51,19 @@ server <- function(input, output) {
 }
 
 # Run the app
-shinyApp(ui, server)
+shinyApp(ui, server).           # create a data frame with year and month columns
+df <- data.frame(
+  year = c(2021, 2021, 2021, 2022, 2022, 2022),
+  month = c(1, 2, 3, 1, 2, 3),
+  value = c(10, 20, 30, 40, 50, 60)
+)
+
+# get current year and month
+current_year <- format(Sys.Date(), "%Y")
+current_month <- format(Sys.Date(), "%m")
+
+# filter data frame to last 6 months
+last_six_months <- subset(df, 
+                           (year == current_year & month >= as.numeric(current_month) - 5) | 
+                           (year == as.numeric(current_year) - 1 & month >= as.numeric(current_month) + 7))
+
