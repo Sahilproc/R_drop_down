@@ -1,23 +1,27 @@
 library(shiny)
 library(rpivotTable)
-library(dplyr)
 
 # Load data
-data(mtcars)
+data(iris)
 
 # Define UI
 ui <- fluidPage(
   titlePanel("Pivot Table Example"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("rows", "Select Rows:", choices = names(mtcars)),
-      selectInput("cols", "Select Columns:", choices = names(mtcars)),
-      selectInput("vals", "Select Values:", choices = names(mtcars), selected = "mpg"),
+      selectInput("rows", "Select Rows:", choices = names(iris)),
+      selectInput("cols", "Select Columns:", choices = names(iris)),
+      selectInput("vals", "Select Values:", choices = names(iris), selected = "Sepal.Length"),
       selectInput("agg", "Select Aggregation:", choices = c("Sum", "Average"), selected = "Sum")
     ),
     mainPanel(
       rpivotTableOutput("pivot")
     )
+  ),
+  tabsetPanel(
+    tabPanel("Pivot Table", rpivotTableOutput("pivot")),
+    tabPanel("Table Data", tableOutput("table")),
+    tabPanel("All Data", dataTableOutput("all_data"))
   )
 )
 
@@ -25,23 +29,24 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create pivot table
   output$pivot <- renderRpivotTable({
-    df <- mtcars %>% 
-      group_by_at(vars(input$rows, input$cols)) %>% 
-      summarise(Total = sum(!!sym(input$vals))) %>% 
-      pivot_wider(names_from = input$cols, values_from = Total, values_fill = 0)
-    
-    df_percent <- df %>% 
-      mutate(Total = rowSums(across(everything()))) %>% 
-      mutate(across(everything(), ~ . / Total * 100))
-    
     rpivotTable(
-      data = as.data.frame(df_percent),
+      data = iris,
       rows = input$rows,
       cols = input$cols,
       aggregatorName = input$agg,
-      vals = names(df)[2:length(names(df))],
-      rendererName = "Table"
+      vals = input$vals,
+      output_type = "server"
     )
+  })
+  
+  # Create table data
+  output$table <- renderTable({
+    iris
+  })
+  
+  # Show all data
+  output$all_data <- renderDataTable({
+    iris
   })
 }
 
