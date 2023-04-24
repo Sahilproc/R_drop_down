@@ -1,67 +1,69 @@
 library(shiny)
-library(rpivotTable)
+library(dplyr)
+library(DT)
 
-# Load data
-data(iris)
+data <- data.frame(
+  KOB = c("A", "B", "C", "A", "B", "C"),
+  New_Vertical = c("X", "X", "X", "Y", "Y", "Y"),
+  Amount = c(10, 20, 30, 40, 50, 60)
+)
 
-# Define UI
 ui <- fluidPage(
-  titlePanel("Pivot Table Example"),
+  titlePanel("Group By Table with Filter"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("rows", "Select Rows:", choices = names(iris)),
-      selectInput("cols", "Select Columns:", choices = names(iris)),
-      selectInput("vals", "Select Values:", choices = names(iris), selected = "Sepal.Length"),
-      selectInput("agg", "Select Aggregation:", choices = c("Sum", "Average"), selected = "Sum")
+      selectInput("kob", "KOB", c("All", unique(data$KOB))),
+      selectInput("vertical", "New_Vertical", c("All", unique(data$New_Vertical))),
+      numericInput("amount", "Amount", min = 0, max = 100, value = 0)
     ),
     mainPanel(
-      rpivotTableOutput("pivot")
+      DTOutput("table")
     )
-  ),
-  tabsetPanel(
-    tabPanel("Pivot Table", rpivotTableOutput("pivot")),
-    tabPanel("Table Data", tableOutput("table")),
-    tabPanel("All Data", dataTableOutput("all_data"))
   )
 )
 
-# Define server
 server <- function(input, output) {
-  # Create pivot table
-  output$pivot <- renderRpivotTable({
-    rpivotTable(
-      data = iris,
-      rows = input$rows,
-      cols = input$cols,
-      aggregatorName = input$agg,
-      vals = input$vals,
-      output_type = "server"
-    )
+  
+  output$table <- renderDT({
+    df <- data
+    
+    # Apply filters based on user input
+    if(input$kob != "All") {
+      df <- df %>%
+        filter(KOB == input$kob)
+    }
+    
+    if(input$vertical != "All") {
+      df <- df %>%
+        filter(New_Vertical == input$vertical)
+    }
+    
+    if(input$amount > 0) {
+      df <- df %>%
+        filter(Amount >= input$amount)
+    }
+    
+    # Apply group by and summarize
+    if(input$kob == "All" & input$vertical == "All") {
+      df <- df %>%
+        group_by(KOB) %>%
+        summarize(
+          Total_Amount = sum(Amount)
+        ) %>%
+        ungroup()
+    } else {
+      df <- df %>%
+        group_by(KOB, New_Vertical) %>%
+        summarize(
+          Total_Amount = sum(Amount)
+        ) %>%
+        ungroup()
+    }
+    
+    # Show table
+    datatable(df, rownames = FALSE)
   })
   
-  # Create table data
-  output$table <- renderTable({
-    iris
-  })
-  
-  # Show all data
-  output$all_data <- renderDataTable({
-    iris
-  })
 }
-# Sample data
-data <- data.frame(year = c(2019, 2019, 2020, 2020, 2021, 2021),
-                   month = c(1, 2, 3, 4, 5, 6),
-                   value = c(10, 15, 20, 25, 30, 35))
 
-# Convert year and month to date format
-data$date <- as.Date(paste0(data$year, "-", data$month, "-01"), format = "%Y-%m-%d")
-
-# Filter for last 6 months
-last_6_months <- subset(data, date >= as.Date(Sys.Date()) - months(6))
-
-# Select only year, month, and value columns
-result <- subset(last_6_months, select = c("year", "month", "value"))
-
-# Print result
-print(result)
+shinyApp(ui = ui, server = server)
