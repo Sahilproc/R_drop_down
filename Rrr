@@ -77,16 +77,17 @@ server <- function(input, output) {
       df <- bind_rows(df_grouped, df_total)
     }
     
-    # Show table
+    # Show table with column totals
     datatable(df, rownames = FALSE, 
               options = list(
                 footerCallback = JS(
                   "function(tfoot, data, start, end, display) {",
-                  "var api = this.api();",
-                  "var sum = api.column(2, {page:'current'}).data().sum();",
-                  "$(api.column(2).footer()).html('Total: '+sum);",
+                  "var api = this.api(),",
+                  "data;",
+                  "total = api.column(2).data().reduce(function (a, b) {return a + b;}, 0);",
+                  "$(api.column(2).footer()).html(total);",
                   "}")
-              ))
+              )) %>% formatCurrency(3:4, '$', digits=2, interval = 3)
   })
   
 }
