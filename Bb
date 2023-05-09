@@ -1,0 +1,12 @@
+# Load the data frames
+df1 <- data.frame(id = c(1, 2, 3), value1 = c(2, 3, 4), col3 = c("a", "b", "c"), col4 = c(10, 20, 30), col5 = c("x", "y", "z"), col6 = c(TRUE, FALSE, TRUE), stringsAsFactors = FALSE)
+df2 <- data.frame(id = c(1, 2, 3), value2 = c(2.5, 3.5, 4.5), col3 = c("a", "b", "c"), col4 = c(100, 200, 300), col5 = c("p", "q", "r"), col6 = c(FALSE, TRUE, FALSE), stringsAsFactors = FALSE)
+
+# Merge the data frames based on the common column "id"
+merged_df <- merge(df1, df2, by = "id")
+
+# Perform the multiplication
+result <- merged_df$value1 * merged_df$value2
+
+# Create a new data frame with the result
+final_df <- data.frame(id = merged_df$id, result = result, col3 = merged_df$col3.x, col4 = merged_df$col4.x, col5 = merged_df$col5.x, col6 = merged_df$col6.x)
