@@ -1,0 +1,36 @@
+
+library(shiny)
+library(openxlsx)
+
+ui <- fluidPage(
+  downloadButton("downloadButton", "Download Protected Excel")
+)
+
+server <- function(input, output) {
+  output$downloadButton <- downloadHandler(
+    filename = function() {
+      "protected_file.xlsx"
+    },
+    content = function(file) {
+      # Generate your data or dataframe here
+      data <- data.frame(
+        Name = c("John", "Jane", "Mike"),
+        Age = c(25, 30, 35)
+      )
+      
+      # Create a workbook
+      wb <- createWorkbook()
+      sheet <- addWorksheet(wb, "Data")
+      writeData(sheet, data)
+      
+      # Set password for the workbook
+      setEncryption(wb, password = "mypassword")
+      
+      # Save the workbook
+      saveWorkbook(wb, file)
+    },
+    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  )
+}
+
+shinyApp(ui, server)
