@@ -41,3 +41,4 @@ company_data = get_company_data()  # Replace with your data collection logic
 data_score = evaluate_company_data(company_data)
 print("Data Score:", data_score)
 
+
