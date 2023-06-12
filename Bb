@@ -57,5 +57,54 @@ Sub FilterTableByFrequency()
     ' Filter the table based on the selected frequency
     rng.AutoFilter Field:=1, Criteria1:=filterValue
     
+Sub GetUniquePortfoliosByFrequency()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim filterValue As String
+    Dim uniquePortfolios As Collection
+    Dim cell As Range
+    Dim portfolio As String
+    Dim outputRange As Range
+    Dim i As Integer
+    
+    ' Set the worksheet containing the table
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Replace "Sheet1" with your sheet name
+    
+    ' Set the range of the table (including headers)
+    Set rng = ws.Range("A1:D" & ws.Cells(ws.Rows.Count, 1).End(xlUp).Row) ' Adjust the range as per your table size
+    
+    ' Get the selected value from the drop-down list
+    filterValue = ws.Range("E1").Value ' Replace "E1" with the cell reference of your drop-down list
+    
+    ' Filter the table based on the selected frequency
+    rng.AutoFilter Field:=1, Criteria1:=filterValue
+    
+    ' Initialize the collection to store unique portfolios
+    Set uniquePortfolios = New Collection
+    
+    ' Loop through the visible cells in the "Portfolio" column
+    For Each cell In rng.Columns("D").SpecialCells(xlCellTypeVisible)
+        portfolio = cell.Value
+        
+        ' Add unique portfolios to the collection
+        On Error Resume Next
+        uniquePortfolios.Add portfolio, CStr(portfolio)
+        On Error GoTo 0
+    Next cell
+    
+    ' Create a range to store the unique portfolios
+    Set outputRange = ws.Range("G1").Resize(uniquePortfolios.Count, 1) ' Replace "G1" with the desired output range
+    
+    ' Transfer unique portfolios to the output range
+    i = 1
+    For Each portfolio In uniquePortfolios
+        outputRange.Cells(i, 1).Value = portfolio
+        i = i + 1
+    Next portfolio
+    
+    ' Clear the filters
+    ws.AutoFilterMode = False
+    
 End Sub
+
 
