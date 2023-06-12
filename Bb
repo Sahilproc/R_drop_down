@@ -36,9 +36,26 @@ def condition2(data):
     # Implement condition 2 logic
     # Return True if condition is met, False otherwise
 
-# Call the evaluation function
-company_data = get_company_data()  # Replace with your data collection logic
-data_score = evaluate_company_data(company_data)
-print("Data Score:", data_score)
+# Call the evaluation function with your data collection logic
 
+
+
+Sub FilterTableByFrequency()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim filterValue As String
+    
+    ' Set the worksheet containing the table
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Replace "Sheet1" with your sheet name
+    
+    ' Set the range of the table (including headers)
+    Set rng = ws.Range("A1:D" & ws.Cells(ws.Rows.Count, 1).End(xlUp).Row) ' Adjust the range as per your table size
+    
+    ' Get the selected value from the drop-down list
+    filterValue = ws.Range("E1").Value ' Replace "E1" with the cell reference of your drop-down list
+    
+    ' Filter the table based on the selected frequency
+    rng.AutoFilter Field:=1, Criteria1:=filterValue
+    
+End Sub
 
