@@ -1,4 +1,4 @@
-
+ji
 # Load the data frames
 df1 <- data.frame(id = c(1, 2, 3), value = c(2, 3, 4), stringsAsFactors = FALSE)
 df2 <- data.frame(id = c(1, 2, 3), value = c("2.5", "3.5", "4.5"), stringsAsFactors = FALSE)
@@ -30,3 +30,8 @@ import pandas as pd
 
 # Assuming your DataFrame is called 'df'
 df = df.loc[~(df == 0).all(axis=1)]
+import pandas as pd
+
+# Assuming your DataFrame is called 'df'
+last_columns = df.columns[-3:]
+df = df.loc[~(df[last_columns].apply(tuple, axis=1) == (0, 0, 0))]
