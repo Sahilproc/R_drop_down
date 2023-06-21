@@ -14,3 +14,9 @@ result <- merged_df$value.x * merged_df$value.y
 
 # Create a new data frame with the result
 final_df <- data.frame(id = merged_df$id, result = result)
+import pandas as pd
+
+# Assuming your DataFrame is called 'df'
+last_columns = df.columns[-6:]
+if (df[last_columns] == 0).all().all():
+    df = df.iloc[:, :-6]
