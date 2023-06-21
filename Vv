@@ -26,3 +26,7 @@ import pandas as pd
 last_columns = df.columns[-6:]
 rows_to_remove = df[df[last_columns] == 0].index
 df = df.drop(rows_to_remove)
+import pandas as pd
+
+# Assuming your DataFrame is called 'df'
+df = df.loc[~(df == 0).all(axis=1)]
