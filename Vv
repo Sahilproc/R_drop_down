@@ -1,4 +1,4 @@
-kiji
+iikiji
 # Load the data frames
 df1 <- data.frame(id = c(1, 2, 3), value = c(2, 3, 4), stringsAsFactors = FALSE)
 df2 <- data.frame(id = c(1, 2, 3), value = c("2.5", "3.5", "4.5"), stringsAsFactors = FALSE)
@@ -60,6 +60,20 @@ df = pd.DataFrame({'Aadhaar Number': ['123456789012', '9876543210', '4567 8901 2
 
 # Apply pattern matching on the 'Aadhaar Number' column
 df['Validity'] = df['Aadhaar Number'].str.contains(pattern).apply(lambda x: 'Valid' if x else 'Invalid')
+
+# Print the DataFrame
+print(df)
+import pandas as pd
+
+def is_aadhaar_number(aadhaar_number):
+    pattern = r'^[2-9]{1}[0-9]{3}[0-9]{4}[0-9]{4}$'
+    return 'Valid' if pd.Series(aadhaar_number).str.match(pattern).any() else 'Invalid'
+
+# Example DataFrame
+df = pd.DataFrame({'Aadhaar Number': ['123456789012', '9876543210', '4567 8901 2345']})
+
+# Apply pattern matching on the 'Aadhaar Number' column
+df['Validity'] = df['Aadhaar Number'].apply(is_aadhaar_number)
 
 # Print the DataFrame
 print(df)
