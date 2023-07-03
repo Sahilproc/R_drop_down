@@ -253,4 +253,4 @@ Sub GetUniquePortfoliosByFrequency()
     
 End Sub
 
-
+Suppose you and a friend agree to meet at a restaurant for dinner. You discuss the time, date, and restaurant choice. This agreement is not a contract because it lacks the necessary elements. There is no consideration involved (no exchange of money or goods), and there is likely no intention for the agreement to be legally binding. It is a simple social arrangement between friends and does not carry legal consequences if either party fails to fulfill their commitment.
