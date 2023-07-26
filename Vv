@@ -1,100 +1,18 @@
-iikiji
-# Load the data frames
-df1 <- data.frame(id = c(1, 2, 3), value = c(2, 3, 4), stringsAsFactors = FALSE)
-df2 <- data.frame(id = c(1, 2, 3), value = c("2.5", "3.5", "4.5"), stringsAsFactors = FALSE)
+import zipfile
 
-# Convert character column to numeric
-df2$value <- as.numeric(df2$value)
+def read_jar_file(jar_file_path):
+    try:
+        with zipfile.ZipFile(jar_file_path, 'r') as jar_file:
+            contents = jar_file.namelist()
+            return contents
+    except zipfile.BadZipFile:
+        print(f"Error: '{jar_file_path}' is not a valid JAR file.")
+        return []
 
-# Merge the data frames based on the common column "id"
-merged_df <- merge(df1, df2, by = "id")
-
-# Perform the multiplication
-result <- merged_df$value.x * merged_df$value.y
-
-# Create a new data frame with the result
-final_df <- data.frame(id = merged_df$id, result = result)
-import pandas as pd
-
-# Assuming your DataFrame is called 'df'
-last_columns = df.columns[-6:]
-if (df[last_columns] == 0).all().all():
-    df = df.iloc[:, :-6]
-import pandas as pd
-
-# Assuming your DataFrame is called 'df'
-last_columns = df.columns[-6:]
-rows_to_remove = df[df[last_columns] == 0].index
-df = df.drop(rows_to_remove)
-import pandas as pd
-
-# Assuming your DataFrame is called 'df'
-df = df.loc[~(df == 0).all(axis=1)]
-import pandas as pd
-
-# Assuming your DataFrame is called 'df'
-last_columns = df.columns[-3:]
-df = df.loc[~(df[last_columns].apply(tuple, axis=1) == (0, 0, 0))]
-import pandas as pd
-
-def is_aadhaar_number(aadhaar_number):
-    pattern = r'^[2-9]{1}[0-9]{3}[0-9]{4}[0-9]{4}$'
-    return 'Valid' if pd.Series(aadhaar_number).str.contains(pattern).any() else 'Invalid'
-
-# Example DataFrame
-df = pd.DataFrame({'Aadhaar Number': ['123456789012', '9876543210', '4567 8901 2345']})
-
-# Apply pattern matching on the 'Aadhaar Number' column
-df['Validity'] = df['Aadhaar Number'].apply(is_aadhaar_number)
-
-# Print the DataFrame
-print(df)
-import pandas as pd
-
-def is_aadhaar_number(aadhaar_number):
-    pattern = r'^[2-9]{1}[0-9]{3}[0-9]{4}[0-9]{4}$'
-    return 'Valid' if pd.Series(aadhaar_number).str.contains(pattern).any() else 'Invalid'
-
-# Example DataFrame
-df = pd.DataFrame({'Aadhaar Number': ['123456789012', '9876543210', '4567 8901 2345']})
-
-# Apply pattern matching on the 'Aadhaar Number' column
-df['Validity'] = df['Aadhaar Number'].str.contains(pattern).apply(lambda x: 'Valid' if x else 'Invalid')
-
-# Print the DataFrame
-print(df)
-import pandas as pd
-
-def is_aadhaar_number(aadhaar_number):
-    pattern = r'^[2-9]{1}[0-9]{3}[0-9]{4}[0-9]{4}$'
-    return 'Valid' if pd.Series(aadhaar_number).str.match(pattern).any() else 'Invalid'
-
-# Example DataFrame
-df = pd.DataFrame({'Aadhaar Number': ['123456789012', '9876543210', '4567 8901 2345']})
-
-# Apply pattern matching on the 'Aadhaar Number' column
-df['Validity'] = df['Aadhaar Number'].apply(is_aadhaar_number)
-
-# Print the DataFrame
-print(df)
-import pandas as pd
-
-def f(df):
-    pattern = r'^[2-9]{1}[0-9]{3}[0-9]{4} [0-9]{4}$'
-    if df['id_ty_1'].astype(str).str.match(pattern).any() and df['id_ty_2'] == 6:
-        return 'Valid'
-    else:
-        return 'Invalid'
-
-# Example DataFrame
-df = pd.DataFrame({
-    'id_ty_1': ['123456789012', '9876543210', '456789012345'],
-    'id_ty_2': [1, 6, 2]
-})
-
-# Apply the function to the DataFrame
-df['Validity'] = df.apply(f, axis=1)
-
-# Print the DataFrame
-print(df)
-
+if __name__ == "__main__":
+    jar_file_path = "your-jar-file.jar"  # Replace with the actual path to the JAR file
+    jar_contents = read_jar_file(jar_file_path)
+    if jar_contents:
+        print("Contents of the JAR file:")
+        for item in jar_contents:
+            print(item)
