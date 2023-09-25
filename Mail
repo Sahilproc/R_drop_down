@@ -1,0 +1,65 @@
+import pandas as pd
+
+# Load the Excel sheet into a DataFrame
+df = pd.read_excel('your_excel_file.xlsx')
+
+# Access the 'To' and 'CC' columns in your DataFrame
+to_emails = df['To'].tolist()
+cc_emails = df['CC'].tolist()
+
+
+
+from docx import Document
+
+# Load the Word document
+doc = Document('your_word_file.docx')
+
+# Initialize an empty string to store the email content
+email_content = ""
+
+# Concatenate the paragraphs in the Word document to form the email content
+for paragraph in doc.paragraphs:
+    email_content += paragraph.text + "\n"
+
+import requests
+import msal
+
+# ... (code for acquiring access token as shown in previous response)
+
+# Loop through the recipients and send emails
+for to_email in to_emails:
+    body = {
+        'message': {
+            'subject': 'Your Subject',
+            'body': {
+                'contentType': 'Text',
+                'content': email_content
+            },
+            'toRecipients': [
+                {
+                    'emailAddress': {
+                        'address': to_email
+                    }
+                }
+            ]
+        }
+    }
+
+    # Add CC recipients if applicable
+    if cc_emails:
+        body['message']['ccRecipients'] = [{'emailAddress': {'address': cc}} for cc in cc_emails]
+
+    # Send the email
+    response = requests.post(email_url, headers=headers, json=body)
+
+    if response.status_code == 202:
+        print(f'Email sent successfully to {to_email}.')
+    else:
+        print(f'Failed to send email to {to_email}. Status code: {response.status_code}')
+
+# ... (handle exceptions and errors as needed)
+
+
+
+
+
