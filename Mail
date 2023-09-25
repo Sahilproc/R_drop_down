@@ -1,65 +1,51 @@
 import pandas as pd
+from exchangelib import Credentials, Account, Message
+import win32com.client
 
-# Load the Excel sheet into a DataFrame
+# Define your credentials
+email_address = 'your_email@example.com'  # Your Outlook email address
+password = 'your_password'  # Your Outlook email password
+
+# Initialize credentials and account
+credentials = Credentials(email_address, password)
+account = Account(email_address, credentials=credentials, autodiscover=True)
+
+# Read data from the Excel sheet (similar to the previous example)
 df = pd.read_excel('your_excel_file.xlsx')
+to_emails = df['To'].dropna().tolist()
+cc_emails = df['CC'].dropna().tolist()
 
-# Access the 'To' and 'CC' columns in your DataFrame
-to_emails = df['To'].tolist()
-cc_emails = df['CC'].tolist()
+# Define common email parameters
+subject = 'Test Email'
+from_email = 'sender@example.com'  # Specify the "From" email address here
 
+# Extract text from the Word document
+word_file_path = 'your_word_file.doc'  # Path to your Word document
+word_app = win32com.client.Dispatch('Word.Application')
+word_doc = word_app.Documents.Open(word_file_path)
+word_text = word_doc.Content.Text
+word_doc.Close()
+word_app.Quit()
 
-
-from docx import Document
-
-# Load the Word document
-doc = Document('your_word_file.docx')
-
-# Initialize an empty string to store the email content
-email_content = ""
-
-# Concatenate the paragraphs in the Word document to form the email content
-for paragraph in doc.paragraphs:
-    email_content += paragraph.text + "\n"
-
-import requests
-import msal
-
-# ... (code for acquiring access token as shown in previous response)
-
-# Loop through the recipients and send emails
+# Send emails to "To" recipients
 for to_email in to_emails:
-    body = {
-        'message': {
-            'subject': 'Your Subject',
-            'body': {
-                'contentType': 'Text',
-                'content': email_content
-            },
-            'toRecipients': [
-                {
-                    'emailAddress': {
-                        'address': to_email
-                    }
-                }
-            ]
-        }
-    }
+    email = Message(account)
+    email.subject = subject
+    email.body = word_text  # Set the email body as the content from the Word document
+    email.to_recipients = [to_email]
+    email.sender.email_address = from_email
+    email.send()
 
-    # Add CC recipients if applicable
-    if cc_emails:
-        body['message']['ccRecipients'] = [{'emailAddress': {'address': cc}} for cc in cc_emails]
+    print(f'Email sent successfully from {from_email} to {to_email}.')
 
-    # Send the email
-    response = requests.post(email_url, headers=headers, json=body)
+# Send emails to "CC" recipients
+for cc_email in cc_emails:
+    email = Message(account)
+    email.subject = subject
+    email.body = word_text  # Set the email body as the content from the Word document
+    email.cc_recipients = [cc_email]
+    email.sender.email_address = from_email
+    email.send()
 
-    if response.status_code == 202:
-        print(f'Email sent successfully to {to_email}.')
-    else:
-        print(f'Failed to send email to {to_email}. Status code: {response.status_code}')
-
-# ... (handle exceptions and errors as needed)
-
-
-
-
+    print(f'Email sent successfully from {from_email} with CC to {cc_email}.')
 
