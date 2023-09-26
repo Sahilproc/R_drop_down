@@ -52,3 +52,64 @@ for row in sheet.iter_rows(min_row=2, values_only=True):  # Assuming header row 
 
 # Close the Excel file
 wb.close()
+
+
+
+
+import pandas as pd
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# Excel file path
+excel_file = 'your_excel_file.xlsx'
+
+# Email configuration
+smtp_server = 'smtp.example.com'  # Replace with your SMTP server address
+smtp_port = 587  # Replace with your SMTP server port
+smtp_username = 'your_username'
+smtp_password = 'your_password'
+
+# Read the Excel sheet
+df = pd.read_excel(excel_file)
+
+# Get "To" and "CC" email addresses from the DataFrame
+to_emails = df['To'].dropna().tolist()
+cc_emails = df['CC'].dropna().tolist()
+
+# Create the email message
+message = MIMEMultipart()
+message['From'] = smtp_username
+message['Subject'] = 'Your Email Subject'
+
+# Email body
+body = 'This is the body of your email.'
+message.attach(MIMEText(body, 'plain'))
+
+# Attachments (if needed)
+# attachment_path = 'your_attachment_file.xlsx'
+# with open(attachment_path, 'rb') as attachment:
+#     attachment_content = MIMEApplication(attachment.read(), _subtype='xlsx')
+#     attachment_content.add_header('Content-Disposition', 'attachment', filename='your_attachment_file.xlsx')
+#     message.attach(attachment_content)
+
+# Connect to the SMTP server and send the email to "To" recipients
+try:
+    smtp = smtplib.SMTP(smtp_server, smtp_port)
+    smtp.starttls()
+    smtp.login(smtp_username, smtp_password)
+
+    for to_email in to_emails:
+        message['To'] = to_email
+        message['Cc'] = ', '.join(cc_emails)  # Combine CC emails as a comma-separated string
+        recipients = [to_email] + cc_emails  # Combine "To" and "CC" recipients
+
+        smtp.sendmail(smtp_username, recipients, message.as_string())
+        print(f'Email sent to {to_email} with CC to {", ".join(cc_emails)}.')
+
+    smtp.quit()
+except Exception as e:
+    print(f'Error sending email: {e}')
+
+
+
