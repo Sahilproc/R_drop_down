@@ -1,0 +1,13 @@
+import pandas as pd
+import os
+
+directory = 'path/to/excel/files'
+combined_data = pd.DataFrame()
+
+for filename in os.listdir(directory):
+    if filename.endswith('.xlsx'):
+        df = pd.read_excel(os.path.join(directory, filename), sheet_name='YourSheetName')
+        subset = df.iloc[1:5, 0:2].transpose()
+        combined_data = pd.concat([combined_data, subset])
+
+combined_data.to_excel('combined_subset_tables.xlsx', index=False)
