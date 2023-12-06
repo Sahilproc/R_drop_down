@@ -1,4 +1,4 @@
-from msg_extractor import MsgExtractor
+mifrom msg_extractor import MsgExtractor
 import os
 
 def extract_attachments_from_msg(msg_file, output_folder):
@@ -116,3 +116,43 @@ output_folder = 'path/to/save/attachments/'
 for msg_file in os.listdir(msg_folder):
     if msg_file.endswith('.msg'):
         extract_attachments(os.path.join(msg_folder, msg_file), output_folder)
+
+
+
+
+
+import os
+from msg_extractor import MSGExtractor
+
+# Function to extract Excel files from .msg files
+def extract_excel_from_msg(msg_folder, output_folder):
+    # Iterate through all .msg files in the specified folder
+    for msg_file in os.listdir(msg_folder):
+        if msg_file.endswith(".msg"):
+            msg_path = os.path.join(msg_folder, msg_file)
+
+            # Create a MSGExtractor instance
+            extractor = MSGExtractor(msg_path)
+
+            # Get the attachments
+            attachments = extractor.get_attachment_files()
+
+            # Iterate through attachments and save Excel files
+            for attachment in attachments:
+                if attachment.lower().endswith(".xlsx") or attachment.lower().endswith(".xls"):
+                    output_path = os.path.join(output_folder, f"{msg_file}_{attachment}")
+                    with open(output_path, "wb") as output_file:
+                        output_file.write(extractor.get_attachment(attachment))
+
+# Specify the folder containing .msg files
+msg_folder = "path/to/msg/files"
+
+# Specify the folder to save extracted Excel files
+output_folder = "path/to/save/excel/files"
+
+# Create the output folder if it doesn't exist
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# Extract Excel files from .msg files
+extract_excel_from_msg(msg_folder, output_folder)
