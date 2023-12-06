@@ -19,3 +19,26 @@ output_folder = 'path/to/save/attachments/'
 for msg_file in os.listdir(msg_folder):
     if msg_file.endswith('.msg'):
         extract_attachments_from_msg(os.path.join(msg_folder, msg_file), output_folder)
+import os
+from extract_msg import Message
+
+def extract_attachments(msg_file, output_folder):
+    msg = Message(msg_file)
+    
+    for attachment in msg.attachments:
+        # Check if the attachment is an Excel file (you can modify the condition based on your needs)
+        if attachment.content_type.startswith('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
+            # Save the attachment to the specified path
+            with open(os.path.join(output_folder, attachment.filename), 'wb') as f:
+                f.write(attachment.content)
+
+# Specify the folder containing saved .msg files
+msg_folder = 'path/to/msg/files/'
+
+# Specify the folder where you want to save the Excel attachments
+output_folder = 'path/to/save/attachments/'
+
+# Iterate through .msg files and extract attachments
+for msg_file in os.listdir(msg_folder):
+    if msg_file.endswith('.msg'):
+        extract_attachments(os.path.join(msg_folder, msg_file), output_folder)
