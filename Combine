@@ -1,13 +1,21 @@
-import pandas as pd
+from msg_extractor import MsgExtractor
 import os
 
-directory = 'path/to/excel/files'
-combined_data = pd.DataFrame()
+def extract_attachments_from_msg(msg_file, output_folder):
+    with MsgExtractor(msg_file) as msg_extractor:
+        for attachment in msg_extractor.iter_attachments():
+            # Check if the attachment is an Excel file (you can modify the condition based on your needs)
+            if attachment.content_type.startswith('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
+                # Save the attachment to the specified path
+                attachment.save(os.path.join(output_folder, attachment.filename))
 
-for filename in os.listdir(directory):
-    if filename.endswith('.xlsx'):
-        df = pd.read_excel(os.path.join(directory, filename), sheet_name='YourSheetName')
-        subset = df.iloc[1:5, 0:2].transpose()
-        combined_data = pd.concat([combined_data, subset])
+# Specify the folder containing saved .msg files
+msg_folder = 'path/to/msg/files/'
 
-combined_data.to_excel('combined_subset_tables.xlsx', index=False)
+# Specify the folder where you want to save the Excel attachments
+output_folder = 'path/to/save/attachments/'
+
+# Iterate through .msg files and extract attachments
+for msg_file in os.listdir(msg_folder):
+    if msg_file.endswith('.msg'):
+        extract_attachments_from_msg(os.path.join(msg_folder, msg_file), output_folder)
