@@ -391,3 +391,41 @@ if __name__ == "__main__":
         os.makedirs(output_folder)
 
     extract_excel_attachments(input_folder, output_folder)
+
+
+
+
+import os
+import olefile
+
+def extract_excel_attachments(folder_path, output_folder):
+    # Iterate through each MSG file in the specified folder
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.msg'):
+            msg_path = os.path.join(folder_path, filename)
+
+            try:
+                # Open the MSG file using olefile
+                with olefile.OleFileIO(msg_path) as ole:
+                    # Iterate through storages and streams
+                    for storage in ole.listdir():
+                        for stream in ole.listdir(storage):
+                            # Check if the stream name contains ".xls" or ".xlsx"
+                            if any(stream.endswith(ext) for ext in ('.xls', '.xlsx')):
+                                stream_data = ole.openstream(storage + '/' + stream).read()
+                                excel_path = os.path.join(output_folder, stream)
+                                with open(excel_path, 'wb') as excel_file:
+                                    excel_file.write(stream_data)
+                                    print(f"Excel file '{stream}' extracted from {msg_path}")
+
+            except Exception as e:
+                print(f"Error processing MSG file '{msg_path}': {e}")
+
+if __name__ == "__main__":
+    input_folder = 'path/to/msg/files'
+    output_folder = 'path/to/save/excel/files'
+
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    extract_excel_attachments(input_folder, output_folder)
