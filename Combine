@@ -469,3 +469,31 @@ if __name__ == "__main__":
         os.makedirs(output_folder)
 
     extract_excel_attachments(input_folder, output_folder)
+
+
+
+
+
+from extract_msg import Message
+
+# Replace 'path_to_your_msg_file' with the actual path to your MSG file
+msg_file_path = 'path_to_your_msg_file.msg'
+
+# Load the MSG file
+msg = Message(msg_file_path)
+
+# Get the attachment
+attachment = msg.attachment
+
+# Check if there is an attachment
+if attachment:
+    # Specify the file path where you want to save the attachment
+    attachment_file_path = 'path/to/save/attachment.txt'  # Change the extension based on the file type
+
+    # Open the file in binary write mode and write the attachment data
+    with open(attachment_file_path, 'wb') as file:
+        file.write(attachment)
+
+    print(f"Attachment saved to {attachment_file_path}")
+else:
+    print("No attachment found in the MSG file.")
