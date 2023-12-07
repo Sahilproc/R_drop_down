@@ -278,3 +278,41 @@ if __name__ == "__main__":
         os.makedirs(output_folder)
     
     extract_excel_attachments(input_folder, output_folder)
+
+
+
+
+
+
+
+import os
+from extract_msg import Message
+import mimetypes
+
+def extract_attachments(msg_file, output_folder):
+    msg = Message(msg_file)
+    
+    for attachment in msg.attachments:
+        # Use get_file_data to retrieve attachment content
+        attachment_content = attachment.get_file_data()
+
+        # Use mimetypes to determine content type
+        content_type, _ = mimetypes.guess_type(attachment.long_filename)
+        
+        # Check if the content type indicates an Excel file
+        if content_type and content_type.startswith('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
+            # Save the attachment to the specified path
+            attachment_name = attachment.long_filename or 'attachment'
+            with open(os.path.join(output_folder, attachment_name), 'wb') as f:
+                f.write(attachment_content)
+
+# Specify the folder containing saved .msg files
+msg_folder = 'path/to/msg/files/'
+
+# Specify the folder where you want to save the Excel attachments
+output_folder = 'path/to/save/attachments/'
+
+# Iterate through .msg files and extract attachments
+for msg_file in os.listdir(msg_folder):
+    if msg_file.endswith('.msg'):
+        extract_attachments(os.path.join(msg_folder, msg_file), output_folder)
