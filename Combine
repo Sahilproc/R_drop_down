@@ -1,4 +1,4 @@
-mifrom msg_extractor import MsgExtractor
+jimifrom msg_extractor import MsgExtractor
 import os
 
 def extract_attachments_from_msg(msg_file, output_folder):
@@ -195,3 +195,43 @@ if not os.path.exists(output_folder):
 
 # Extract Excel files from .msg files
 extract_excel_from_msg(msg_folder, output_folder)
+
+
+
+
+
+
+
+import os
+from msg_extractor import MSGExtractor
+from openpyxl import load_workbook
+
+def extract_excel_attachments(folder_path, output_folder):
+    # Iterate through each MSG file in the specified folder
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.msg'):
+            msg_path = os.path.join(folder_path, filename)
+            
+            try:
+                # Load the MSG file
+                msg = MSGExtractor(msg_path)
+                
+                # Extract Excel attachments from the MSG file
+                for attachment in msg.attachments:
+                    if attachment.filename.endswith(('.xls', '.xlsx')):
+                        excel_path = os.path.join(output_folder, attachment.filename)
+                        with open(excel_path, 'wb') as excel_file:
+                            excel_file.write(attachment.data)
+                            print(f"Excel file '{attachment.filename}' extracted from {msg_path}")
+            
+            except Exception as e:
+                print(f"Error processing MSG file '{msg_path}': {e}")
+
+if __name__ == "__main__":
+    input_folder = 'path/to/msg/files'
+    output_folder = 'path/to/save/excel/files'
+    
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    
+    extract_excel_attachments(input_folder, output_folder)
