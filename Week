@@ -1,1 +1,1 @@
-=SUM(WEEKNUM(A1, 2) - WEEKNUM(DATE(YEAR(A1), MONTH(A1), 1), 2) + 1, WEEKNUM(A2, 2) - WEEKNUM(DATE(YEAR(A2), MONTH(A2), 1), 2) + 1, WEEKNUM(A3, 2) - WEEKNUM(DATE(YEAR(A3), MONTH(A3), 1), 2) + 1) / 3
+df.iloc[df[df["File Details"]=="Loan Category"].index[0]:df[df["File Details"]=="Loan Category"].index[0]+10,[0]]+"Records Accepted"
