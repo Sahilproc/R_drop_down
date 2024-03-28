@@ -1,1 +1,40 @@
-df.iloc[df[df["File Details"]=="Loan Category"].index[0]:df[df["File Details"]=="Loan Category"].index[0]+10,[0]]+"Records Accepted"
+import imaplib
+import email
+from datetime import datetime
+
+# IMAP server credentials
+username = 'your_email@example.com'
+password = 'your_password'
+
+# IMAP server settings
+imap_server = 'imap.example.com'
+imap_port = 993
+
+# Connect to the IMAP server
+mail = imaplib.IMAP4_SSL(imap_server, imap_port)
+mail.login(username, password)
+
+# Select the mailbox to search
+mail.select("inbox")
+
+# Search for emails with specific subject and date
+subject = "Your Subject"
+date = datetime.now().strftime("%d-%b-%Y")  # Format: DD-Mon-YYYY
+result, data = mail.search(None, '(SUBJECT "{}" SINCE "{}")'.format(subject, date))
+
+# Fetch email IDs
+email_ids = data[0].split()
+
+# Fetch and print email content
+for email_id in email_ids:
+    result, data = mail.fetch(email_id, "(RFC822)")
+    raw_email = data[0][1]
+    msg = email.message_from_bytes(raw_email)
+    print('From:', msg['From'])
+    print('Subject:', msg['Subject'])
+    print('Date:', msg['Date'])
+    print('Body:', msg.get_payload())
+    print('------------------------------------------')
+
+# Close the connection
+mail.logout()
