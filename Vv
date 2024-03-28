@@ -42,3 +42,36 @@ excel_file_path = "email_bodies.xlsx"
 df.to_excel(excel_file_path, index=False)
 
 print("Email bodies saved to:", excel_file_path)
+
+
+
+
+
+
+import win32com.client
+import pandas as pd
+
+# Connect to Outlook
+outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+inbox = outlook.GetDefaultFolder(6)  # 6 refers to the Inbox folder
+
+# Define the specific text to search for in the subject line
+specific_text = "specific subject text"
+
+# Initialize lists to store email bodies
+email_bodies = []
+
+# Loop through emails in the inbox
+for message in inbox.Items:
+    if specific_text.lower() in message.Subject.lower():
+        email_bodies.append(message.Body)
+
+# Create a DataFrame with the email bodies
+df = pd.DataFrame(email_bodies, columns=["Email Body"])
+
+# Save the DataFrame to an Excel file
+excel_file_path = "email_bodies.xlsx"
+df.to_excel(excel_file_path, index=False)
+
+print("Email bodies saved to:", excel_file_path)
+
