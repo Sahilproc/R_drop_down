@@ -153,3 +153,44 @@ print("Email bodies saved to:", excel_file_path)
 
 print("Email bodies saved to:", excel_file_path)
 
+
+
+
+
+import win32com.client
+import pandas as pd
+from datetime import datetime
+
+# Connect to Outlook
+outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+inbox = outlook.GetDefaultFolder(6)  # 6 refers to the Inbox folder
+
+# Define the specific text to search for in the subject line
+specific_text = "specific subject text"
+
+# Define the date to filter emails
+desired_date = datetime(2024, 3, 15)  # Change to your desired date
+
+# Initialize lists to store email bodies and dates
+email_bodies = []
+email_dates = []
+
+# Loop through emails in the inbox
+for message in inbox.Items:
+    if specific_text.lower() in message.Subject.lower():
+        received_date = message.ReceivedTime.date()
+        if received_date == desired_date:
+            email_bodies.append(message.Body)
+            email_dates.append(received_date)
+
+# Create a DataFrame with the email bodies and dates
+df = pd.DataFrame({"Received Date": email_dates, "Email Body": email_bodies})
+
+# Save the DataFrame to an Excel file
+excel_file_path = "email_bodies.xlsx"
+df.to_excel(excel_file_path, index=False)
+
+print("Email bodies saved to:", excel_file_path)
+
+
+
