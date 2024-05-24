@@ -1,12 +1,17 @@
-   externalWorkbookPath = "C:\Users\sahil.kadam\Desktop\Micro"  ' Change this to the correct path
-   externalWorkbookName = "File 2.xlsx"
-   externalSheetName = "Sheet1"
-
-   lastRow = mainWs.Cells(mainWs.Rows.Count, "J").End(xlUp).Row
-   If lastRow < 2 Then
-       MsgBox "No data found in column J.", vbCritical
-       Exit Sub
-   End If
-   ' Add VLOOKUP formula to column K of the main sheet
-   Set formulaRange = mainWs.Range("L2:L" & lastRow)
-   formulaRange.Formula = "=VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE)"
+Dim r As Integer, Brand As String
+Set ws = ActiveSheet
+ws.Range("A1:L1").AutoFilter
+r = 1
+Do
+  r = r + 1
+  Brand = ws.Range("L" & r).Value
+  On Error Resume Next
+  If Sheets(Brand) Is Nothing Then
+    ws.Range("A1:L1").AutoFilter Field:=1, Criterial:=Brand
+    ws.Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible).Copy
+    Sheets.Add.Name = Brand
+    Sheets(Brand).Paste
+    ws.ShowAllData
+  End If
+Loop While ws.Range("A" & r + 1).Value <> ""
+End Sub
