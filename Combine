@@ -161,45 +161,10 @@ Sub FetchData()
    
    Sheets("Dump").Name = "Main"
    
-   
-   
-   
-   ' Set the worksheet with the main data
-   Set destSheet = ThisWorkbook.Sheets("Dump")
-   
-   
-   
-   lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
-   ' Get unique values from column A
-   Set UniqueValues = New Collection
-   On Error Resume Next
-   For Each cell In destSheet.Range("A2:A" & lastRow)
-       UniqueValues.Add cell.Value, CStr(cell.Value)
-   Next cell
-   On Error GoTo 0
-   ' Loop through each unique value in column A
-   For Each Value In UniqueValues
-       ' Check if the value is not empty
-       If Value <> "" Then
-           ' Add a new sheet for the unique value
-           Set wsDest = Nothing
-           On Error Resume Next
-           Set wsDest = ThisWorkbook.Sheets(Value)
-           On Error GoTo 0
-           If wsDest Is Nothing Then
-               Set wsDest = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-               wsDest.Name = Value
-           End If
-           ' Filter and copy data to the new sheet
-           destSheet.Range("A1:L" & lastRow).AutoFilter Field:=1, Criteria1:=Value
-           destSheet.Range("A1:L" & lastRow).SpecialCells(xlCellTypeVisible).Copy Destination:=wsDest.Range("A1")
-           ' Clear the filter
-           destSheet.AutoFilterMode = False
-       End If
-   Next Value
+  ' Set ws = destSheet.Sheets("Sheet1")
+  
 
-    
-
+  
 
     
 
