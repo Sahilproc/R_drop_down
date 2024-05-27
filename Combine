@@ -98,161 +98,111 @@ Sub FetchData()
     ' Close the source workbook
 
     sourceWorkbook.Close SaveChanges:=False
+    
+    '---------------------------------------------
+    
+   Dim ws As Worksheet
+   Dim mainWs As Worksheet
+   Dim rng As Range
+   Dim col As Range
+   Dim dict As Object
+   Dim key As Variant
+   Dim I As Integer
+   Dim lastRow As Long
+   Dim formulaRange As Range
+   Dim filterRange As Range, copyRange As Range
+   Dim newWs As Worksheet
+    
+    
+   ' Format header row
+   Set rng = destSheet.Rows("1:1")
+   rng.Font.Bold = True
+   rng.Interior.Color = RGB(217, 217, 217)
+   
+   
+   ' Autofit columns
+   destSheet.Columns("A:Z").AutoFit
+   
+   
+    ' Apply all borders
+   rng.CurrentRegion.Borders.LineStyle = xlContinuous
+   
+   
+   
+   
+   
+   
+   externalWorkbookPath = "C:\Users\"  ' Change this to the correct path
+   
+   
+   externalWorkbookName = "File 2.xlsx"
+ 
+   externalSheetName = "Sheet1"
+   
+   
+   lastRow = destSheet.Cells(destSheet.Rows.Count, "J").End(xlUp).Row
+   
+   
+   If lastRow < 2 Then MsgBox "No data found in column J.", vbCritical: Exit Sub
+ 
+' Add VLOOKUP formula to column L (previously column K) and set the column name as "folder"
+ 
+   destSheet.Range("L2:L" & lastRow).Formula = "=VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE)"
+' Dim result As Variant
+ 
+ 
+' mainWs.Range("L2:L" & lastRow).Formula = "=Application.WorksheetFunction.Iferror(Application.VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE),"")"
+ 
+ 
+   destSheet.Range("L2:L" & lastRow).Value = destSheet.Range("L2:L" & lastRow).Value
+   
+   
+   destSheet.Range("L1").Value = "Folder"
+   
+   Sheets("Dump").Name = "Main"
+   
+   
+   
+   
+   ' Set the worksheet with the main data
+   Set destSheet = ThisWorkbook.Sheets("Dump")
+   
+   
+   
+   lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
+   ' Get unique values from column A
+   Set UniqueValues = New Collection
+   On Error Resume Next
+   For Each cell In destSheet.Range("A2:A" & lastRow)
+       UniqueValues.Add cell.Value, CStr(cell.Value)
+   Next cell
+   On Error GoTo 0
+   ' Loop through each unique value in column A
+   For Each Value In UniqueValues
+       ' Check if the value is not empty
+       If Value <> "" Then
+           ' Add a new sheet for the unique value
+           Set wsDest = Nothing
+           On Error Resume Next
+           Set wsDest = ThisWorkbook.Sheets(Value)
+           On Error GoTo 0
+           If wsDest Is Nothing Then
+               Set wsDest = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+               wsDest.Name = Value
+           End If
+           ' Filter and copy data to the new sheet
+           destSheet.Range("A1:L" & lastRow).AutoFilter Field:=1, Criteria1:=Value
+           destSheet.Range("A1:L" & lastRow).SpecialCells(xlCellTypeVisible).Copy Destination:=wsDest.Range("A1")
+           ' Clear the filter
+           destSheet.AutoFilterMode = False
+       End If
+   Next Value
+
+    
+
+
+    
 
     MsgBox "Data fetched successfully!"
 
 End Sub
-
-
-
-
-
-
-
-
-after fetchting data from this code    use [Friday 9:32 PM] KADAM, SAHIL
-Sub AutomateExcelTasks()
-
-    Dim ws As Worksheet
-
-    Dim mainWs As Worksheet
-
-    Dim newSheet As Worksheet
-
-    Dim rng As Range
-
-    Dim col As Range
-
-    Dim dict As Object
-
-    Dim key As Variant
-
-    Dim I As Integer
-
-    Dim lastRow As Long
-
-    Dim formulaRange As Range
-
-    Dim filterRange As Range, copyRange As Range
-
-    Dim newWs As Worksheet
-
-    ' 1. Delete first 2 rows
-
-    Rows("1:2").Delete
-
-    ' 2. Format header row
-
-    Set rng = Rows("1:1")
-
-    rng.Font.Bold = True
-
-    rng.Interior.Color = RGB(217, 217, 217)
-
-    ' 3. Wrap text in all columns
-
-    Columns("A:Z").WrapText = True
-
-    ' 4. Autofit columns
-
-    Columns("A:Z").AutoFit
-
-    ' 5. Apply all borders
-
-    rng.CurrentRegion.Borders.LineStyle = xlContinuous
-
-    ' 6. Remove duplicates
-
-    rng.CurrentRegion.RemoveDuplicates Columns:=Array(1, 2, 3), Header:=xlYes ' Adjust columns array as needed
-
-    Set mainWs = ThisWorkbook.ActiveSheet
-
-    ' Prompt the user to input the external file details
-
-    externalWorkbookPath = InputBox("Enter the external workbook path:")
-
-    externalWorkbookName = InputBox("Enter the external workbook name:")
-
-    externalSheetName = InputBox("Enter the external sheet name:")
-
-    ' Find the last row with data in column J
-
-    lastRow = mainWs.Cells(mainWs.Rows.Count, "J").End(xlUp).Row
-
-    ' Check if there's data in column J
-
-    If lastRow < 2 Then MsgBox "No data found in column J.", vbCritical: Exit Sub
-
-    ' Add VLOOKUP formula to column L (previously column K) and set the column name as "folder"
-
-    mainWs.Range("L2:L" & lastRow).Formula = "=VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE)"
-
-    mainWs.Range("L2:L" & lastRow).Value = mainWs.Range("L2:L" & lastRow).Value
-
-    mainWs.Range("L1").Value = "Folder"
-
-    Sheets("Main").Name = "Main"
-
-    ' Set the worksheet with the main data
-
-    Set wsMain = ThisWorkbook.Sheets("Main")
-
-    ' Find the last row in column A
-
-    lastRow = wsMain.Cells(wsMain.Rows.Count, "A").End(xlUp).Row
-
-    ' Get unique values from column A
-
-    Set UniqueValues = New Collection
-
-    On Error Resume Next
-
-    For Each cell In wsMain.Range("A2:A" & lastRow)
-
-        UniqueValues.Add cell.Value, CStr(cell.Value)
-
-    Next cell
-
-    On Error GoTo 0
-
-    ' Loop through each unique value in column A
-
-    For Each Value In UniqueValues
-
-        ' Check if the value is not empty
-
-        If Value <> "" Then
-
-            ' Add a new sheet for the unique value
-
-            Set wsDest = Nothing
-
-            On Error Resume Next
-
-            Set wsDest = ThisWorkbook.Sheets(Value)
-
-            On Error GoTo 0
-
-            If wsDest Is Nothing Then
-
-                Set wsDest = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-
-                wsDest.Name = Value
-
-            End If
-
-            ' Filter and copy data to the new sheet
-
-            wsMain.Range("A1:L" & lastRow).AutoFilter Field:=1, Criteria1:=Value
-
-            wsMain.Range("A1:L" & lastRow).SpecialCells(xlCellTypeVisible).Copy Destination:=wsDest.Range("A1")
-
-            ' Clear the filter
-
-            wsMain.AutoFilterMode = False
-
-        End If
-
-    Next Value
-
-End Sub   
