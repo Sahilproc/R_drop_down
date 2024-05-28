@@ -16,6 +16,8 @@ Sub FetchData()
     
     Dim headerRow As Long
     
+    Dim rng As Range
+    
     
     Dim newSheet As Worksheet
 
@@ -23,7 +25,7 @@ Sub FetchData()
 
     Set fd = Application.FileDialog(msoFileDialogFilePicker)
 
-    ' Configure FileDialog settings
+    
 
     With fd
 
@@ -77,7 +79,15 @@ Sub FetchData()
     
     ' ------------------------------
     
-    
+
+  
+  
+  
+  
+  
+  
+  
+  
     
     
 
@@ -103,7 +113,7 @@ Sub FetchData()
     
    Dim ws As Worksheet
    Dim mainWs As Worksheet
-   Dim rng As Range
+   
    Dim col As Range
    Dim dict As Object
    Dim key As Variant
@@ -112,12 +122,24 @@ Sub FetchData()
    Dim formulaRange As Range
    Dim filterRange As Range, copyRange As Range
    Dim newWs As Worksheet
+   
     
     
    ' Format header row
    Set rng = destSheet.Rows("1:1")
    rng.Font.Bold = True
    rng.Interior.Color = RGB(217, 217, 217)
+   
+  
+   
+   
+   
+   
+   
+ 
+
+   
+   
    
    
    ' Autofit columns
@@ -126,6 +148,12 @@ Sub FetchData()
    
     ' Apply all borders
    rng.CurrentRegion.Borders.LineStyle = xlContinuous
+   
+   
+   
+   
+   
+   
    
    
    
@@ -163,8 +191,37 @@ Sub FetchData()
    
   ' Set ws = destSheet.Sheets("Sheet1")
   
+  '-------
+   ' Create new worksheet to paste filtered data
+   
+   ' Assuming column A contains the unique variables for filtering
+   lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
+   ' Create a dictionary to store unique values in column A
+   Set dict = CreateObject("Scripting.Dictionary")
+   For Each cell In destSheet.Range("A2:A" & lastRow)
+       If Not dict.exists(cell.Value) Then
+           dict.Add cell.Value, Nothing
+       End If
+   Next cell
+   ' Loop through unique values in column A
+   For Each key In dict.keys
+       ' Filter data based on unique value in column A
+       destSheet.AutoFilterMode = False ' Clear any existing filters
+       destSheet.Range("A1").AutoFilter Field:=1, Criteria1:=key
+       Set filterRange = destSheet.AutoFilter.Range.SpecialCells(xlCellTypeVisible)
+       ' Create a new sheet for each unique value in column A
+       Set newWs = Worksheets.Add
+       newWs.Name = key
+       ' Copy filtered data to the new sheet along with headers
+       destSheet.Rows(1).Copy newWs.Rows(1)
+       filterRange.Copy newWs.Range("A1")
+       newWs.Columns.AutoFit
+       destSheet.AutoFilterMode = False ' Clear filter
+   Next key
 
-  
+
+
+
 
     
 
