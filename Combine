@@ -1,230 +1,25 @@
-Sub FetchData()
-
-    Dim sourceWorkbook As Workbook
-
-    Dim sourceSheet As Worksheet
-
-    Dim destSheet As Worksheet
-
-    Dim sourceRange As Range
-
-    Dim destRange As Range
-
-    Dim fd As FileDialog
-
-    Dim filePath As String
-    
-    Dim headerRow As Long
-    
-    Dim rng As Range
-    
-    
-    Dim newSheet As Worksheet
-
-    ' Initialize the FileDialog object as a file picker
-
-    Set fd = Application.FileDialog(msoFileDialogFilePicker)
-
-    
-
-    With fd
-
-        .Title = "Select the source workbook"
-
-        .Filters.Add "Excel Files", "*.xls; *.xlsx; *.xlsm", 1
-
-        .AllowMultiSelect = False
-
-        ' Show the FileDialog
-
-        If .Show = -1 Then
-
-            ' Get the selected file path
-
-            filePath = .SelectedItems(1)
-
-        Else
-
-            MsgBox "No file selected. Exiting the macro."
-
-            Exit Sub
-
-        End If
-
-    End With
-
-    ' Set the destination sheet
-
-    ' Set destSheet = ThisWorkbook.Sheets("Sheet1") ' Adjust the sheet name accordingly
-    
-    Set newWorkbook = Workbooks.Add
-    
-    Set destSheet = newWorkbook.Sheets.Add
-    
-    destSheet.Name = "DUMP"
-    
-
-
-    ' Open the source workbook
-
-    Set sourceWorkbook = Workbooks.Open(filePath)
-
-    ' Set the source sheet
-
-    Set sourceSheet = sourceWorkbook.Sheets("Sheet1") ' Adjust the sheet name accordingly
-
-    ' Set the range to copy from the source sheet
-
-    Set sourceRange = sourceSheet.Range("A3:XFD1048576") ' Adjust the range accordingly
-    
-    ' ------------------------------
-    
-
-  
-  
-  
-  
-  
-  
-  
-  
-    
-    
-
-    ' Set the range to paste in the destination sheet
-
-    Set destRange = destSheet.Range("A1") ' Adjust the range accordingly
-    
-    
-    
-    
-    
-    
-
-    ' Copy the data from the source to the destination
-
-    sourceRange.Copy Destination:=destRange
-
-    ' Close the source workbook
-
-    sourceWorkbook.Close SaveChanges:=False
-    
-    '---------------------------------------------
-    
-   Dim ws As Worksheet
-   Dim mainWs As Worksheet
-   
-   Dim col As Range
-   Dim dict As Object
-   Dim key As Variant
-   Dim I As Integer
-   Dim lastRow As Long
-   Dim formulaRange As Range
-   Dim filterRange As Range, copyRange As Range
-   Dim newWs As Worksheet
-   
-    
-    
-   ' Format header row
-   Set rng = destSheet.Rows("1:1")
-   rng.Font.Bold = True
-   rng.Interior.Color = RGB(217, 217, 217)
-   
-  
-   
-   
-   
-   
-   
+  lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
  
-
-   
-   
-   
-   
-   ' Autofit columns
-   destSheet.Columns("A:Z").AutoFit
-   
-   
-    ' Apply all borders
-   rng.CurrentRegion.Borders.LineStyle = xlContinuous
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   externalWorkbookPath = "C:\Users\"  ' Change this to the correct path
-   
-   
-   externalWorkbookName = "File 2.xlsx"
- 
-   externalSheetName = "Sheet1"
-   
-   
-   lastRow = destSheet.Cells(destSheet.Rows.Count, "J").End(xlUp).Row
-   
-   
-   If lastRow < 2 Then MsgBox "No data found in column J.", vbCritical: Exit Sub
- 
-' Add VLOOKUP formula to column L (previously column K) and set the column name as "folder"
- 
-   destSheet.Range("L2:L" & lastRow).Formula = "=VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE)"
-' Dim result As Variant
- 
- 
-' mainWs.Range("L2:L" & lastRow).Formula = "=Application.WorksheetFunction.Iferror(Application.VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE),"")"
- 
- 
-   destSheet.Range("L2:L" & lastRow).Value = destSheet.Range("L2:L" & lastRow).Value
-   
-   
-   destSheet.Range("L1").Value = "Folder"
-   
-   Sheets("Dump").Name = "Main"
-   
-  ' Set ws = destSheet.Sheets("Sheet1")
-  
-  '-------
-   ' Create new worksheet to paste filtered data
-   
-   ' Assuming column A contains the unique variables for filtering
-   lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
-   ' Create a dictionary to store unique values in column A
    Set dict = CreateObject("Scripting.Dictionary")
    For Each cell In destSheet.Range("A2:A" & lastRow)
        If Not dict.exists(cell.Value) Then
            dict.Add cell.Value, Nothing
        End If
    Next cell
-   ' Loop through unique values in column A
+ 
    For Each key In dict.keys
-       ' Filter data based on unique value in column A
-       destSheet.AutoFilterMode = False ' Clear any existing filters
+      
        destSheet.Range("A1").AutoFilter Field:=1, Criteria1:=key
        Set filterRange = destSheet.AutoFilter.Range.SpecialCells(xlCellTypeVisible)
-       ' Create a new sheet for each unique value in column A
+       
        Set newWs = Worksheets.Add
        newWs.Name = key
-       ' Copy filtered data to the new sheet along with headers
+      
        destSheet.Rows(1).Copy newWs.Rows(1)
        filterRange.Copy newWs.Range("A1")
        newWs.Columns.AutoFit
        destSheet.AutoFilterMode = False ' Clear filter
-   Next key
-
-
-
-
-
     
-
-    MsgBox "Data fetched successfully!"
-
-End Sub
+   Next key
+   
+   
