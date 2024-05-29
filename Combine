@@ -1,25 +1,324 @@
-  lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
+Sub FetchData()
+
+    Dim sourceWorkbook As Workbook
+
+    Dim sourceSheet As Worksheet
+
+    Dim destSheet As Worksheet
+
+    Dim sourceRange As Range
+
+    Dim destRange As Range
+
+    Dim fd As FileDialog
+
+    Dim filePath As String
+    
+    Dim headerRow As Long
+    
+    Dim rng As Range
+    
+    
+    Dim newSheet As Worksheet
+
+    ' Initialize the FileDialog object as a file picker
+
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+
+    
+
+    With fd
+
+        .Title = "Select the source workbook"
+
+        .Filters.Add "Excel Files", "*.xls; *.xlsx; *.xlsm", 1
+
+        .AllowMultiSelect = False
+
+        ' Show the FileDialog
+
+        If .Show = -1 Then
+
+            ' Get the selected file path
+
+            filePath = .SelectedItems(1)
+
+        Else
+
+            MsgBox "No file selected. Exiting the macro."
+
+            Exit Sub
+
+        End If
+
+    End With
+    
+    
+    
+  
+
+
+  
+    
+    Set newWorkbook = Workbooks.Add
+    
+    Set destSheet = newWorkbook.Sheets.Add
+    
+    destSheet.Name = "DUMP"
+    
+
+
+   
+
+    Set sourceWorkbook = Workbooks.Open(filePath)
+
  
+
+    Set sourceSheet = sourceWorkbook.Sheets("Sheet1")
+
+    ' Set the range to copy from the source sheet
+
+    Set sourceRange = sourceSheet.Range("A3:XFD1048576")
+    
+    ' ------------------------------
+    
+
+  
+  
+  
+  
+  
+  
+  
+  
+    
+    
+
+    '  paste in the destination sheet
+
+    Set destRange = destSheet.Range("A1")
+    
+    
+    
+    
+    
+    
+
+
+    sourceRange.Copy Destination:=destRange
+
+
+    sourceWorkbook.Close SaveChanges:=False
+    
+    '---------------------------------------------
+    
+   Dim ws As Worksheet
+   Dim mainWs As Worksheet
+   
+   Dim col As Range
+   Dim dict As Object
+   Dim key As Variant
+   Dim I As Integer
+   Dim lastRow As Long
+   Dim formulaRange As Range
+   Dim filterRange As Range, copyRange As Range
+   Dim newWs As Worksheet
+   
+    
+    
+   ' Format header row
+   Set rng = destSheet.Rows("1:1")
+   rng.Font.Bold = True
+   rng.Interior.Color = RGB(217, 217, 217)
+   
+  
+   
+   
+   
+   
+   
+ 
+
+   
+   
+   
+   
+   ' Autofit columns
+   destSheet.Columns("A:Z").AutoFit
+   
+   
+    ' Apply all borders
+   rng.CurrentRegion.Borders.LineStyle = xlContinuous
+   
+   
+   
+   ' Delete rows with "Non-employee" in "Employee Class" column
+ 
+   Set rng = ActiveSheet.Rows(1)
+ 
+   rng.AutoFilter Field:=rng.Find("Employee Class").Column, Criteria1:="Non-employee"
+ 
+   ActiveSheet.AutoFilter.Range.Offset(1, 0).SpecialCells(xlCellTypeVisible).EntireRow.Delete
+ 
+   ActiveSheet.AutoFilterMode = False
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   externalWorkbookPath = "C:\Users\"  ' Change this to the correct path
+   
+   
+   externalWorkbookName = "File 2.xlsx"
+ 
+   externalSheetName = "Sheet1"
+   
+   
+   lastRow = destSheet.Cells(destSheet.Rows.Count, "J").End(xlUp).Row
+   
+   
+   If lastRow < 2 Then MsgBox "No data found in column J.", vbCritical: Exit Sub
+ 
+' Add VLOOKUP
+ 
+   destSheet.Range("L2:L" & lastRow).Formula = "=VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE)"
+
+ 
+ 
+' mainWs.Range("L2:L" & lastRow).Formula = "=Application.WorksheetFunction.Iferror(Application.VLOOKUP(J2, '" & externalWorkbookPath & "[" & externalWorkbookName & "]" & externalSheetName & "'!$A:$B, 2, FALSE),"")"
+ 
+ 
+   destSheet.Range("L2:L" & lastRow).Value = destSheet.Range("L2:L" & lastRow).Value
+   
+   
+   destSheet.Range("L1").Value = "Folder"
+   
+   
+ 
+   
+   
+   
+   
+ 
+   
+   
+   
+   
+   
+   
+   
+   ' Apply all borders
+'   destSheet.Cells.BorderAround xlContinuous, xlMedium
+ '  destSheet.Cells.Borders.Color = RGB(128, 128, 128)
+ 
+ rng.CurrentRegion.Borders.LineStyle = xlContinuous
+ 
+ 
+
+
+
+
+   
+   ' Remove duplicates
+On Error Resume Next
+destSheet.Cells.RemoveDuplicates Columns:=Array(1, destSheet.Cells(1, Columns.Count).End(xlToLeft).Column), Header:=xlYes
+If Err.Number <> 0 Then
+   MsgBox "Error removing duplicates: " & Err.Description
+End If
+On Error GoTo 0
+   
+   
+   
+   
+   
+   Sheets("Dump").Name = "Main"
+   
+  ' Set ws = destSheet.Sheets("Sheet1")
+  
+  '-------
+   ' Create new worksheet to paste filtered data
+   
+   Set originalWb = ThisWorkbook
+   
+   
+   ' for creating multiple Excel Sheet
+   
+    ' Find the last row in column A
+   lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
+   ' Create dictionary to store unique values
    Set dict = CreateObject("Scripting.Dictionary")
    For Each cell In destSheet.Range("A2:A" & lastRow)
        If Not dict.exists(cell.Value) Then
            dict.Add cell.Value, Nothing
        End If
    Next cell
- 
+   ' Loop through unique keys and create workbooks
    For Each key In dict.keys
-      
+       ' Apply filter based on the key
        destSheet.Range("A1").AutoFilter Field:=1, Criteria1:=key
        Set filterRange = destSheet.AutoFilter.Range.SpecialCells(xlCellTypeVisible)
-       
-       Set newWs = Worksheets.Add
+       ' Create new workbook
+       Set newWb = Workbooks.Add
+       Set newWs = newWb.Sheets(1)
+       newWs.Name = "Data"
+       ' Copy headers and filtered data to new workbook
+       destSheet.Rows(1).Copy newWs.Rows(1)
+       filterRange.Copy newWs.Range("A1")
+       newWs.Columns.AutoFit
+       ' Save the new workbook with the name of the key
+       On Error Resume Next
+       newWb.SaveAs Filename:=originalWb.Path & "\" & key & ".xlsx"
+       If Err.Number <> 0 Then
+           MsgBox "Could not save workbook for key: " & key
+           Err.Clear
+       End If
+       On Error GoTo 0
+       ' Close the new workbook
+       newWb.Close SaveChanges:=False
+       ' Clear the filter
+       destSheet.AutoFilterMode = False
+   Next key
+   
+   ' in one worksheet all describe data
+   
+   
+   
+    lastRow = destSheet.Cells(destSheet.Rows.Count, "A").End(xlUp).Row
+   Set dict = CreateObject("Scripting.Dictionary")
+   For Each cell In destSheet.Range("A2:A" & lastRow)
+       If Not dict.exists(cell.Value) Then
+           dict.Add cell.Value, Nothing
+       End If
+   Next cell
+   For Each key In dict.keys
+       destSheet.Range("A1").AutoFilter Field:=1, Criteria1:=key
+       Set filterRange = destSheet.AutoFilter.Range.SpecialCells(xlCellTypeVisible)
+       ' Add a new worksheet after the last worksheet, then move it to the second position
+       Set newWs = Worksheets.Add(After:=Worksheets(Worksheets.Count))
        newWs.Name = key
-      
+       newWs.Move After:=destSheet ' Move the new worksheet right after the main sheet
        destSheet.Rows(1).Copy newWs.Rows(1)
        filterRange.Copy newWs.Range("A1")
        newWs.Columns.AutoFit
        destSheet.AutoFilterMode = False ' Clear filter
-    
    Next key
    
    
+
+
+
+
+
+   
+    
+
+    MsgBox "Data fetched successfully!"
+
+End Sub
